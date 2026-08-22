@@ -1,0 +1,30 @@
+# Files
+01_fraudlens_roadmap.md
+Overview.md
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data files
+data/raw/*
+data/interim/*
+data/processed/*
+
+# Trained models
+models/
+*.pkl
+*.pickle
+*.joblib
+
+# IDEs and editors
+.vscode/

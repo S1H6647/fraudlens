@@ -1,0 +1,41 @@
+[project]
+name = "fraudlens"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Sanjit Hyanju", email = "sanjithyanju99@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.19.1",
+    "fastapi>=0.141.1",
+    "imbalanced-learn>=0.14.2",
+    "joblib>=1.5.3",
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "psycopg[binary]>=3.3.4",
+    "pydantic-settings>=2.15.0",
+    "scikit-learn>=1.9.0",
+    "shap>=0.52.0",
+    "sqlalchemy>=2.0.52",
+    "uvicorn[standard]>=0.52.4",
+    "xgboost>=3.4.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.39.10",
+    "httpx>=0.28.1",
+    "ipykernel>=7.3.0",
+    "jupyterlab>=4.6.3",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.4",
+]
