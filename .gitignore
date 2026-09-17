@@ -2,6 +2,7 @@
 01_fraudlens_roadmap.md
 Overview.md
 FraudLens_Development_Milestones.md
+demo.py
 
 # Environment variables and secrets
 .env

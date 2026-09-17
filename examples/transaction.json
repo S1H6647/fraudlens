@@ -1,0 +1,11 @@
+{
+  "transaction_id": 300000,
+  "user_id": 3399,
+  "timestamp": 2900000,
+  "amount": 50,
+  "merchant_category": 3,
+  "country": 10,
+  "device_id": 22279,
+  "channel": 0,
+  "hours_since_prev_txn": 1000
+}
