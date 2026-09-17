@@ -11,6 +11,7 @@ demo.py
 
 # Python virtual environments
 .venv/
+.cache/
 
 # Python cache and compiled files
 __pycache__/

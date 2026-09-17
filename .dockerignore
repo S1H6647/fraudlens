@@ -9,3 +9,7 @@ examples
 README.md
 Dockerfile
 .dockerignore
+datasets
+artifacts
+.cache
+tests

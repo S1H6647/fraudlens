@@ -89,7 +89,34 @@ Supply only these nine raw fields:
 
 The example is illustrative, not a known fraud case. The backend loads `datasets/train.csv` once at startup, ignores its labels, and calculates all 26 V1 inputs using only that user's earlier transactions. Future rows, rows at the submitted timestamp, and rows with the submitted transaction ID are excluded. Earlier history is ordered by timestamp then transaction ID for deterministic ties. Unlike V1's arbitrary within-timestamp ordering, simultaneous transactions are not treated as prior observations of the submitted transaction.
 
-For Render, set `FRAUD_HISTORY_URL` to your direct Hugging Face file URL, such as `https://huggingface.co/datasets/S1H6647/fraudlens/resolve/main/train.csv?download=true`. Set `FRAUD_MODEL_URL` to a direct `xgb_recall_055.joblib` URL when the model is not included in the image. For private repositories, set `HUGGINGFACE_TOKEN` as a secret environment variable. If these URLs are unset, local files are used.
+When local files are absent, startup automatically downloads `train.csv` and `xgb_recall_055.joblib` from `S1H6647/fraudlens` on Hugging Face, following the DemandPulse runtime-asset pattern. Downloads stream in 1 MiB chunks to temporary files and are atomically moved into a disk cache. Failed downloads retry up to three times and never leave a partial cache entry. Model and history are loaded once per process, and history is indexed by user for prediction.
+
+Existing cached files are reused. Cache entries are keyed by URL/revision; set `HF_DATASET_REVISION` to an immutable commit for reproducible deployments. With `main`, updated files at the same URL require clearing that cache or changing the revision. Ephemeral Render instances download again when their filesystem is replaced; an optional persistent cache can be configured with `FRAUD_CACHE_DIR`.
+
+Optional settings:
+
+| Variable | Default / purpose |
+|---|---|
+| `HF_DATASET_REPO` | `S1H6647/fraudlens` |
+| `HF_DATASET_REVISION` | `main` |
+| `HF_MODEL_FILE` | `xgb_recall_055.joblib` |
+| `HF_DATASET_PREFIX` | Empty; optional repository subdirectory |
+| `FRAUD_CACHE_DIR` | `.cache/assets` under the project root |
+| `HF_TOKEN` / `HUGGINGFACE_TOKEN` | Optional secret for private Hugging Face access |
+| `FRAUD_HISTORY_URL` / `FRAUD_MODEL_URL` | Explicit HTTPS file URLs, overriding local files and repository settings |
+
+## Docker and Render
+
+Deploy the **`render` branch** as a Docker web service, using `Dockerfile` at the repository root. Leave the Docker command override empty: the image starts Uvicorn on `0.0.0.0` and uses Render's `PORT` automatically (8000 locally). Configure `/health` as the health-check path. Swagger is served at `https://YOUR-SERVICE.onrender.com/docs`.
+
+The image installs `requirements-runtime.txt` only. It never installs this repository as an editable package and does not copy datasets or model artifacts. The Python 3.12 image includes `libgomp1` for XGBoost. Public Hugging Face assets require no environment variables by default.
+
+```bash
+docker build -t fraudlens .
+docker run --rm -p 8000:8000 fraudlens
+```
+
+If a build log still references `/home/s1h/Projects/AI-ML/fraudlens`, Render is building an older commit or another branch. Select the latest `render` commit and use **Clear build cache & deploy**.
 
 Users without history receive zero counts, new-device/location flags, and missing historical amounts/gaps that the saved pipeline imputes. The supplied `hours_since_prev_txn` is passed through unchanged. Missing raw fields, extra fields, and invalid values are rejected. Requests do not append to history, alter CSVs, or retrain the model; restart the backend after updating the dataset. Scoring an existing training transaction is a demonstration, not independent model evaluation.
 

@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import joblib
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from src.api import DATA_PATH, MODEL_PATH, app
 from src.features import RAW_COLUMNS, build_features
+from src.runtime_assets import ensure_runtime_assets
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +23,7 @@ def payload():
 
 @pytest.fixture
 def client():
-    if not MODEL_PATH.exists():
+    if not MODEL_PATH.exists() and not os.getenv("RUN_ASSET_INTEGRATION"):
         pytest.skip("Export the local V1 model artifact before running API integration tests")
     with TestClient(app) as test_client:
         yield test_client
@@ -30,8 +32,9 @@ def client():
 def test_prediction_matches_saved_pipeline(client, payload):
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
-    saved = joblib.load(MODEL_PATH)
-    row = build_features(payload, pd.read_csv(DATA_PATH, usecols=RAW_COLUMNS))
+    data_path, model_path = ensure_runtime_assets(DATA_PATH, MODEL_PATH)
+    saved = joblib.load(model_path)
+    row = build_features(payload, pd.read_csv(data_path, usecols=RAW_COLUMNS))
     expected = saved["pipeline"].predict_proba(
         pd.DataFrame([row], columns=saved["feature_columns"])
     )[0, 1]
